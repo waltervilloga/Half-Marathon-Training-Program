@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>12-Week Advanced Half Marathon Training Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .type-easy {
+        background-color: #f0fdf4;
+        border-top: 4px solid #22c55e;
+      }
+      .type-medium {
+        background-color: #fef2f2;
+        border-top: 4px solid #ef4444;
+      }
+      .type-hard {
+        background-color: #fff7ed;
+        border-top: 4px solid #f97316;
+      }
+      .type-hills {
+        background-color: #faf5ff;
+        border-top: 4px solid #a855f7;
+      }
+      .type-speedwork {
+        background-color: #eff6ff;
+        border-top: 4px solid #3b82f6;
+      }
+      .type-crosstrain {
+        background-color: #e0f2fe;
+        border-top: 4px solid #06b6d4;
+      }
+      .type-recovery {
+        background-color: #f8fafc;
+        border-top: 4px solid #64748b;
+      }
+      .type-goal {
+        background-color: #fef08a;
+        border-top: 4px solid #eab308;
+      }
+
+      /* Smooth scrolling for horizontal week bar on mobile */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans antialiased pb-12">
+    <header
+      class="bg-slate-900 text-white py-6 px-4 shadow-md sticky top-0 z-50"
+    >
+      <div
+        class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4"
+      >
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight">
+            Half Marathon Training Program
+          </h1>
+          <p class="text-slate-400 text-xs mt-0.5">
+            Target Time: <span style="color: #fcff5a">2h to Sub-1h30</span> |
+            Conversion: 1km ≈ 0.61mi
+          </p>
+        </div>
+
+        <div
+          class="w-full md:w-64 bg-slate-800 rounded-full h-6 relative overflow-hidden shadow-inner border border-slate-700"
+        >
+          <div
+            id="progress-bar"
+            class="bg-emerald-500 h-full transition-all duration-500 ease-out"
+            style="width: 0%"
+          ></div>
+          <span
+            id="progress-text"
+            class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white"
+            >0% Complete</span
+          >
+        </div>
+      </div>
+    </header>
+
+    <section class="max-w-7xl mx-auto px-4 mt-6">
+      <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+        <div
+          class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 text-[11px] font-bold text-center"
+        >
+          <div
+            class="p-1.5 rounded bg-green-50 text-green-700 border border-green-200"
+          >
+            Easy
+          </div>
+          <div
+            class="p-1.5 rounded bg-red-50 text-red-700 border border-red-200"
+          >
+            Medium
+          </div>
+          <div
+            class="p-1.5 rounded bg-orange-50 text-orange-700 border border-orange-200"
+          >
+            Hard
+          </div>
+          <div
+            class="p-1.5 rounded bg-purple-50 text-purple-700 border border-purple-200"
+          >
+            Hills
+          </div>
+          <div
+            class="p-1.5 rounded bg-blue-50 text-blue-700 border border-blue-200"
+          >
+            Speedwork (flat)
+          </div>
+          <div
+            class="p-1.5 rounded bg-cyan-50 text-cyan-700 border border-cyan-200"
+          >
+            Cross Training
+          </div>
+          <div
+            class="p-1.5 rounded bg-slate-50 text-slate-700 border border-slate-200"
+          >
+            Optional/Recovery
+          </div>
+          <div
+            class="p-1.5 rounded bg-yellow-100 text-yellow-800 border border-yellow-300"
+          >
+            Goal
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 mt-6">
+      <div
+        class="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x"
+        id="week-selector-container"
+      ></div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-4 mt-4">
+      <div
+        id="active-week-title"
+        class="text-xl font-bold text-slate-800 mb-4 px-1"
+      ></div>
+      <div
+        id="horizontal-schedule"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4"
+      ></div>
+    </main>
+
+    <section class="max-w-7xl mx-auto px-4 mt-8">
+      <div
+        class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+      >
+        <div
+          class="bg-slate-800 text-white px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-700"
+        >
+          <div>
+            <h3 class="text-lg font-bold">
+              ⏱️ Advanced Running Metrics & Pace Engine
+            </h3>
+            <p class="text-slate-400 text-xs mt-0.5">
+              Input your 5k personal record to dynamically scale splits,
+              intensity thresholds, and target race predictions.
+            </p>
+          </div>
+          <div
+            class="flex items-center gap-2 bg-slate-900/70 p-2.5 rounded-lg border border-slate-700 self-start md:self-auto"
+          >
+            <span
+              class="text-xs font-bold text-emerald-400 uppercase tracking-wider mr-1"
+              >Your 5k PR Anchor:</span
+            >
+            <div class="flex items-center gap-1">
+              <input
+                type="number"
+                id="input-5k-min"
+                value="25"
+                min="10"
+                max="59"
+                class="w-14 bg-slate-800 border border-slate-600 rounded text-center text-sm font-bold text-white focus:outline-none focus:border-emerald-500 py-1"
+              />
+              <span class="text-xs font-bold text-slate-400">m</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <input
+                type="number"
+                id="input-5k-sec"
+                value="0"
+                min="0"
+                max="59"
+                class="w-14 bg-slate-800 border border-slate-600 rounded text-center text-sm font-bold text-white focus:outline-none focus:border-emerald-500 py-1"
+              />
+              <span class="text-xs font-bold text-slate-400">s</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div class="lg:col-span-2 flex flex-col gap-4">
+            <h4
+              class="text-sm font-bold text-slate-400 uppercase tracking-wider"
+            >
+              Customized Intensity Thresholds
+            </h4>
+            <div
+              class="overflow-x-auto border border-gray-100 rounded-xl shadow-inner bg-slate-50/30"
+            >
+              <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr
+                    class="border-b border-gray-200 bg-slate-100/70 text-slate-500 font-semibold text-xs uppercase"
+                  >
+                    <th class="p-3">Intensity</th>
+                    <th class="p-3">Zone Description</th>
+                    <th class="p-3">Per KM Split</th>
+                    <th class="p-3">Per Mile Split</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="pace-table-body"
+                  class="divide-y divide-gray-100 font-medium text-slate-700"
+                ></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-6">
+            <div
+              class="bg-slate-900 text-white rounded-xl p-4 shadow-sm border border-slate-800"
+            >
+              <h4
+                class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-1"
+              >
+                🏆 Projected Race Targets
+              </h4>
+              <div class="space-y-3 font-medium">
+                <div
+                  class="flex justify-between items-center bg-slate-800/60 p-2 rounded border border-slate-700/50"
+                >
+                  <span class="text-xs text-slate-300 font-bold"
+                    >10km Goal Target:</span
+                  >
+                  <span
+                    id="predict-10k"
+                    class="text-sm font-mono font-bold text-white"
+                    >--:--:--</span
+                  >
+                </div>
+                <div
+                  class="flex justify-between items-center bg-slate-800/60 p-2 rounded border border-slate-700/50"
+                >
+                  <span class="text-xs text-slate-300 font-bold"
+                    >Half Marathon (21.1k):</span
+                  >
+                  <span
+                    id="predict-21k"
+                    class="text-sm font-mono font-bold text-amber-400"
+                    >--:--:--</span
+                  >
+                </div>
+                <div
+                  class="flex justify-between items-center bg-slate-800/60 p-2 rounded border border-slate-700/50"
+                >
+                  <span class="text-xs text-slate-300 font-bold"
+                    >Full Marathon (42.2k):</span
+                  >
+                  <span
+                    id="predict-42k"
+                    class="text-sm font-mono font-bold text-white"
+                    >--:--:--</span
+                  >
+                </div>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-3 italic leading-tight">
+                Predictions scaled utilizing an advanced physiological threshold
+                model based directly on your baseline 5km capacity metrics.
+              </p>
+            </div>
+
+            <div
+              class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm space-y-4 text-sm"
+            >
+              <div>
+                <h4
+                  class="font-bold text-purple-700 flex items-center gap-1.5 mb-1"
+                >
+                  ⛰️ Hills Training Targets
+                </h4>
+                <ul class="text-xs space-y-1 text-slate-600 font-medium">
+                  <li>
+                    • <span class="font-bold">90%:</span> Steepest vertical hill
+                    gradient you can sustain
+                  </li>
+                  <li>
+                    • <span class="font-bold">80%:</span> Medium steady aerobic
+                    gradient
+                  </li>
+                  <li>
+                    • <span class="font-bold">70%:</span> Noticeable structural
+                    incline base
+                  </li>
+                  <li
+                    class="text-amber-600 font-bold mt-1.5 flex items-center gap-1"
+                  >
+                    ⚠️
+                    <span
+                      >Must warm up dynamically for at least 10 minutes</span
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div class="border-t border-gray-100 pt-3">
+                <h4
+                  class="font-bold text-blue-700 flex items-center gap-1.5 mb-1"
+                >
+                  ⚡ Flat Speedwork Requirements
+                </h4>
+                <p class="text-xs text-slate-600 font-medium leading-relaxed">
+                  Target flat velocity intervals must fall securely within the
+                  calculated
+                  <span class="font-bold text-blue-600">70% to 90%</span>
+                  threshold bands to prevent injury mechanics.
+                </p>
+                <p
+                  class="text-xs text-amber-600 font-bold mt-1.5 flex items-center gap-1"
+                >
+                  ⚠️
+                  <span>Must warm up dynamically for at least 10 minutes</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      const programData = [
+        {
+          week: 1,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 10km, 6mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "4x1km, 2min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 8km, 5mi" },
+            {
+              name: "Thursday",
+              type: "speedwork",
+              desc: "20x200m, 60sec rest (90%-100% Flat Speed)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 10km, 6mi" },
+            { name: "Sunday", type: "easy", desc: "Run 8km, 5mi" },
+          ],
+        },
+        {
+          week: 2,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 10km, 6mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "6x1km, 2min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 8km, 5mi" },
+            {
+              name: "Thursday",
+              type: "speedwork",
+              desc: "10x400m, 90sec rest (90%-100% Flat Speed)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 10km, 6mi" },
+            { name: "Sunday", type: "easy", desc: "Run 8km, 5mi" },
+          ],
+        },
+        {
+          week: 3,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 10km, 6mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "4x1km, 1min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 8km, 5mi" },
+            {
+              name: "Thursday",
+              type: "speedwork",
+              desc: "8x500m, 2min rest (90%-100% Flat Speed)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 12km, 7.5mi" },
+            { name: "Sunday", type: "easy", desc: "Run 8km, 5mi" },
+          ],
+        },
+        {
+          week: 4,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 10km, 6mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "6x1km, 1min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 8km, 5mi" },
+            {
+              name: "Thursday",
+              type: "speedwork",
+              desc: "5x800m, 3min rest (90%-100% Flat Speed)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 12km, 7.5mi" },
+            { name: "Sunday", type: "easy", desc: "Run 8km, 5mi" },
+          ],
+        },
+        {
+          week: 5,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 12km, 7.5mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "6x1km, 2min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 10km, 6mi" },
+            {
+              name: "Thursday",
+              type: "hills",
+              desc: "8x100m, 60sec rest (90%-100% Hills)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 15km, 9.5mi" },
+            { name: "Sunday", type: "easy", desc: "Run 10km, 6mi" },
+          ],
+        },
+        {
+          week: 6,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 12km, 7.5mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "8x1km, 2min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 10km, 6mi" },
+            {
+              name: "Thursday",
+              type: "hills",
+              desc: "10x100m, 60sec rest (90%-100% Hills)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 15km, 9.5mi" },
+            { name: "Sunday", type: "easy", desc: "Run 10km, 6mi" },
+          ],
+        },
+        {
+          week: 7,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 12km, 7.5mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "6x1km, 1min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 10km, 6mi" },
+            {
+              name: "Thursday",
+              type: "hills",
+              desc: "8x200m, 60sec rest (90%-100% Hills)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 15km, 9.5mi" },
+            { name: "Sunday", type: "easy", desc: "Run 10km, 6mi" },
+          ],
+        },
+        {
+          week: 8,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 12km, 7.5mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "8x1km, 1min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 10km, 6mi" },
+            {
+              name: "Thursday",
+              type: "hills",
+              desc: "10x200m, 60sec rest (90%-100% Hills)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 18km, 11mi" },
+            { name: "Sunday", type: "easy", desc: "Run 10km, 6mi" },
+          ],
+        },
+        {
+          week: 9,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 14km, 9mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "8x1km, 2min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 12km, 7.5mi" },
+            {
+              name: "Thursday",
+              type: "speedwork",
+              desc: "4x2km, 3min rest (80%-90% Flat Speed)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 22km, 13.5mi" },
+            { name: "Sunday", type: "easy", desc: "Run 12km, 7.5mi" },
+          ],
+        },
+        {
+          week: 10,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 14km, 9mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "10x1km, 2min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 12km, 7.5mi" },
+            {
+              name: "Thursday",
+              type: "speedwork",
+              desc: "3x3km, 3min rest (80%-90% Flat Speed)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "hard", desc: "Run 22km, 13.5mi" },
+            { name: "Sunday", type: "easy", desc: "Run 12km, 7.5mi" },
+          ],
+        },
+        {
+          week: 11,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 10km, 6mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "8x1km, 2min rest (80%-90%)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 12km, 7.5mi" },
+            {
+              name: "Thursday",
+              type: "speedwork",
+              desc: "2x5km, 5min rest (70%-80% Tempo Focus)",
+            },
+            {
+              name: "Friday",
+              type: "crosstrain",
+              desc: "3km, 2mi run + cross training workout",
+            },
+            { name: "Saturday", type: "medium", desc: "Run 10km, 6mi" },
+            { name: "Sunday", type: "easy", desc: "Run 12km, 7.5mi" },
+          ],
+        },
+        {
+          week: 12,
+          days: [
+            { name: "Monday", type: "easy", desc: "Run 5km, 3mi" },
+            {
+              name: "Tuesday",
+              type: "speedwork",
+              desc: "4x1km, 3min rest (race pace)",
+            },
+            { name: "Wednesday", type: "medium", desc: "Run 5km, 3mi" },
+            {
+              name: "Thursday",
+              type: "speedwork",
+              desc: "3x400m, 3min rest (90% Flat Speed)",
+            },
+            {
+              name: "Friday",
+              type: "recovery",
+              desc: "Run 20 min (Optional Recovery)",
+            },
+            {
+              name: "Saturday",
+              type: "goal",
+              desc: "Half Marathon time trail 🏆",
+            },
+            { name: "Sunday", type: "easy", desc: "Run 5km, 3mi" },
+          ],
+        },
+      ];
+
+      // Core Intensity thresholds mapped to base 5k capacity
+      const intensityProfiles = [
+        {
+          pct: "100%",
+          desc: "100m Tempo Run (High Intensity)",
+          color: "text-red-600",
+          factor: 0.726,
+        },
+        {
+          pct: "90%",
+          desc: "1km / 1 Mile Race Pace",
+          color: "text-orange-500",
+          factor: 0.876,
+        },
+        {
+          pct: "80%",
+          desc: "5km Race Pace",
+          color: "text-yellow-600",
+          factor: 1.0,
+        },
+        {
+          pct: "70%",
+          desc: "10km Race Pace (Medium)",
+          color: "text-green-600",
+          factor: 1.07,
+        },
+        {
+          pct: "60%",
+          desc: "21.1km Half Marathon Pace",
+          color: "text-blue-600",
+          factor: 1.166,
+        },
+        {
+          pct: "50%",
+          desc: "42.2km Marathon Pace (Relaxed)",
+          color: "text-emerald-600",
+          factor: 1.333,
+        },
+        {
+          pct: "40%",
+          desc: "Ultra Endurance Base Pace (8+ hrs)",
+          color: "text-slate-500",
+          factor: 1.75,
+        },
+        {
+          pct: "50%",
+          desc: "Recovery Run (Optional)",
+          color: "text-amber-700",
+          factor: 1.333,
+        },
+      ];
+
+      let currentActiveWeek = 1;
+      const weekSelectorContainer = document.getElementById(
+        "week-selector-container",
+      );
+      const scheduleContainer = document.getElementById("horizontal-schedule");
+      const activeWeekTitle = document.getElementById("active-week-title");
+      const paceTableBody = document.getElementById("pace-table-body");
+
+      // Helper formatting functions
+      function secondsToMMSS(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = Math.round(totalSeconds % 60);
+        return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      }
+
+      function secondsToHHMMSS(totalSeconds) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = Math.round(totalSeconds % 60);
+        return hours > 0
+          ? `${hours}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`
+          : `${minutes}m ${String(seconds).padStart(2, "0")}s`;
+      }
+
+      // Dynamically recalculate all elements inside pace metrics block
+      function updatePaceTable() {
+        const inputMin =
+          parseInt(document.getElementById("input-5k-min").value) || 0;
+        const inputSec =
+          parseInt(document.getElementById("input-5k-sec").value) || 0;
+
+        const total5kSeconds = inputMin * 60 + inputSec;
+        if (total5kSeconds <= 0) return;
+
+        const baseKmSeconds = total5kSeconds / 5;
+        const mileConversionFactor = 1.60934;
+
+        // 1. Re-render individual splits table rows
+        paceTableBody.innerHTML = "";
+        intensityProfiles.forEach((profile, idx) => {
+          const targetKmSeconds = baseKmSeconds * profile.factor;
+          const targetMileSeconds = targetKmSeconds * mileConversionFactor;
+          const rowBg = idx % 2 === 1 ? "bg-slate-50/60" : "";
+          const uniqueRowStyle = profile.desc.includes("Recovery")
+            ? "bg-amber-50/40"
+            : rowBg;
+
+          const tr = document.createElement("tr");
+          tr.className = uniqueRowStyle;
+          tr.innerHTML = `
+                    <td class="p-3 border-b border-gray-100 ${profile.color} font-bold text-xs">${profile.pct}</td>
+                    <td class="p-3 border-b border-gray-100 font-semibold text-slate-700">${profile.desc}</td>
+                    <td class="p-3 border-b border-gray-100 font-mono text-slate-900 font-bold">${secondsToMMSS(targetKmSeconds)}</td>
+                    <td class="p-3 border-b border-gray-100 font-mono text-slate-500">${secondsToMMSS(targetMileSeconds)}</td>
+                `;
+          paceTableBody.appendChild(tr);
+        });
+
+        // 2. Perform race time modeling using physiological scaling (Riegel Formula)
+        const predict10kSec = total5kSeconds * Math.pow(10 / 5, 1.06);
+        const predict21kSec = total5kSeconds * Math.pow(21.0975 / 5, 1.06);
+        const predict42kSec = total5kSeconds * Math.pow(42.195 / 5, 1.06);
+
+        document.getElementById("predict-10k").innerText =
+          secondsToHHMMSS(predict10kSec);
+        document.getElementById("predict-21k").innerText =
+          secondsToHHMMSS(predict21kSec);
+        document.getElementById("predict-42k").innerText =
+          secondsToHHMMSS(predict42kSec);
+      }
+
+      // Render top horizontal Week Selector tabs
+      function renderWeekSelector() {
+        weekSelectorContainer.innerHTML = "";
+        programData.forEach((w) => {
+          const btn = document.createElement("button");
+          btn.className = `snap-center shrink-0 px-5 py-2.5 rounded-lg font-bold text-sm border transition-all ${
+            w.week === currentActiveWeek
+              ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+              : "bg-white text-slate-600 border-gray-200 hover:bg-gray-50"
+          }`;
+          btn.innerText = `Week ${w.week}`;
+          btn.onclick = () => {
+            currentActiveWeek = w.week;
+            renderWeekSelector();
+            renderActiveWeek();
+          };
+          weekSelectorContainer.appendChild(btn);
+        });
+      }
+
+      // Render the 7 Days horizontally for the picked week
+      function renderActiveWeek() {
+        scheduleContainer.innerHTML = "";
+        activeWeekTitle.innerText = `Training Plan Overview: Week ${currentActiveWeek}`;
+
+        const weekData = programData.find((w) => w.week === currentActiveWeek);
+
+        weekData.days.forEach((d, index) => {
+          const taskId = `w${currentActiveWeek}d${index}`;
+          const column = document.createElement("div");
+          column.className =
+            "bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col justify-between overflow-hidden transition-transform duration-200 hover:-translate-y-0.5";
+
+          column.innerHTML = `
+                    <div class="type-${d.type} p-4 flex-grow flex flex-col justify-between min-h-[140px]">
+                        <div>
+                            <span class="block text-xs uppercase font-bold tracking-wider text-slate-400 mb-1">${d.name}</span>
+                            <p class="text-slate-800 font-bold text-base leading-tight">${d.desc}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <span class="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded tracking-wide bg-white/80 text-slate-600 shadow-sm border border-gray-100">${d.type}</span>
+                            <input type="checkbox" id="${taskId}" data-id="${taskId}" class="task-checkbox rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 w-5 h-5 cursor-pointer">
+                        </div>
+                    </div>
+                `;
+          scheduleContainer.appendChild(column);
+        });
+
+        bindCheckboxes();
+      }
+
+      function updateGlobalProgress() {
+        const saved = localStorage.getItem("half_marathon_progress");
+        const checkedStates = saved ? JSON.parse(saved) : {};
+        const totalTasks = 84;
+        let checkedCount = 0;
+
+        for (let key in checkedStates) {
+          if (checkedStates[key] === true) checkedCount++;
+        }
+
+        const percentage = Math.round((checkedCount / totalTasks) * 100);
+        document.getElementById("progress-bar").style.width = `${percentage}%`;
+        document.getElementById("progress-text").innerText =
+          `${percentage}% Complete (${checkedCount}/${totalTasks} Days)`;
+      }
+
+      function bindCheckboxes() {
+        const currentCheckboxes = document.querySelectorAll(".task-checkbox");
+        const saved = localStorage.getItem("half_marathon_progress");
+        const checkedStates = saved ? JSON.parse(saved) : {};
+
+        currentCheckboxes.forEach((box) => {
+          if (checkedStates[box.dataset.id]) {
+            box.checked = true;
+          }
+
+          box.addEventListener("change", () => {
+            const latestSaved = localStorage.getItem("half_marathon_progress");
+            const states = latestSaved ? JSON.parse(latestSaved) : {};
+            states[box.dataset.id] = box.checked;
+
+            localStorage.setItem(
+              "half_marathon_progress",
+              JSON.stringify(states),
+            );
+            updateGlobalProgress();
+          });
+        });
+      }
+
+      // Attach event listeners to updating inputs
+      document
+        .getElementById("input-5k-min")
+        .addEventListener("input", updatePaceTable);
+      document
+        .getElementById("input-5k-sec")
+        .addEventListener("input", updatePaceTable);
+
+      // Initializer sequence
+      renderWeekSelector();
+      renderActiveWeek();
+      updateGlobalProgress();
+      updatePaceTable();
+    </script>
+  </body>
+</html>
